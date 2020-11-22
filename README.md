@@ -1,1 +1,1 @@
-# tic-toe-recognition
+# tic-tac-toe-recognition
