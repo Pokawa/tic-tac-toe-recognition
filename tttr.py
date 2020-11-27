@@ -1,62 +1,37 @@
-from skimage.io import imread, imshow
-from skimage.transform import rotate, resize, rescale
-from skimage.feature import match_template, canny
-from skimage.draw import polygon
-from skimage.color import rgb2gray
-from skimage.measure import find_contours
-from skimage.morphology import dilation, erosion
-from matplotlib import pyplot 
-from numpy import arange, where, unravel_index, argmax
+import cv2
+from numpy import ones
+from grid import is_grid, get_lines
 
-def close_and_dilation(image):
-    image = dilation(image)
-    image = erosion(image)
-    image = dilation(image)
-    image = dilation(image)
-    return image
-
-def fill_contours(image):
-    contours = find_contours(image, 0.8)
-    for contour in contours:
-        rr, cc = polygon(contour[:, 0], contour[:, 1])
-        image[rr, cc] = True
-    return image
-
-def prepare_image(image):
-    image = rgb2gray(image)
-    image = canny(image, sigma=3)
-    image = close_and_dilation(image)
-    image = fill_contours(image)
-    return image
 
 def main():
-    template = imread("./data/img_template.jpg")
-    image = imread("./data/img2.jpg")
+    filename = './data/img8.jpg'
+    image = cv2.imread(filename)
 
-    prepared_template = prepare_image(template)
-    prepared_image = prepare_image(image)
+    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    image_canny = cv2.Canny(image_gray, 100, 200)
 
-    result = match_template(prepared_image, prepared_template)
-    ij = unravel_index(argmax(result), result.shape)
-    x, y = ij[::-1]
+    kernel = ones((2, 2))
+    image_canny = cv2.dilate(image_canny, kernel)
+    image_canny = cv2.erode(image_canny, kernel)
+    image_canny = cv2.dilate(image_canny, kernel)
 
-    print(x, y)
+    contours, _ = cv2.findContours(image_canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    bounding_boxes = [cv2.contourArea(c) for c in contours]
+    bounding_boxes = sorted(bounding_boxes, reverse=True)
 
-    ax1 = pyplot.subplot(2, 2, 1)
-    ax2 = pyplot.subplot(2, 2, 2)
-    ax3 = pyplot.subplot(2, 2, 3)
-    ax4 = pyplot.subplot(2, 2, 4)
+    x, y, w, h = cv2.boundingRect(contours[-1])
+    piece = image[y:y + w, x:x + w]
+    contour = image_canny[y:y + w, x:x + w]
+    lines = get_lines(contour)
+    possible = is_grid(contour.shape, lines)
+    if possible is not None:
+        print("{} found".format(possible))
+        for line in possible:
+            cv2.line(piece, line.p1, line.p2, (0, 0, 255), 1)
 
-    ax1.imshow(prepared_template)
-    ax2.imshow(prepared_image)
-    ax3.imshow(result)
-    ax4.imshow(image)
-
-    h, w = prepared_template.shape
-    rect = pyplot.Rectangle((x, y), w, h, edgecolor='r', facecolor='none')
-    ax4.add_patch(rect)
-
-    pyplot.show()
+    cv2.imshow('zdjecie', image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
