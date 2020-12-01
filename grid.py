@@ -26,9 +26,9 @@ def get_grid(contour, image_contour):
     straight_grid = check_for_straight_grids(contour, image_contour)
     if straight_grid is not None:
         return straight_grid, False
-    rotated_grid = check_for_rotated_grids(contour, image_contour)
-    if rotated_grid is not None:
-        return rotated_grid, True
+    # rotated_grid = check_for_rotated_grids(contour, image_contour)
+    # if rotated_grid is not None:
+    #     return rotated_grid, True
 
 
 def check_for_straight_grids(contour, image_contour):
@@ -116,13 +116,13 @@ def are_properly_angled(lines: tuple):
     if not Line.is_perpendicular(l1, l3, max_difference=radians(10)):
         return False
 
-    if not l1.is_vertical(radians(10)):
-        return False
-    if not l2.is_vertical(radians(10)):
-        return False
-    if not l3.is_horizontal(radians(10)):
-        return False
-    if not l4.is_horizontal(radians(10)):
-        return False
+    # if not l1.is_vertical(radians(10)):
+    #     return False
+    # if not l2.is_vertical(radians(10)):
+    #     return False
+    # if not l3.is_horizontal(radians(10)):
+    #     return False
+    # if not l4.is_horizontal(radians(10)):
+    #     return False
 
     return True

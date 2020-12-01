@@ -31,7 +31,7 @@ def main():
             grid_gray = pull_rotated_piece(image_gray, contour)
             grid_contour = pull_rotated_piece(image_canny, contour)
             drawContours(image, [box], 0, (0, 0, 255), 2)
-            putText(image, "grid {}".format(index), box[0], FONT_HERSHEY_PLAIN, 4, (0, 255, 0), 2)
+            putText(image, "grid {}".format(index), (box[0][0], box[0][1]), FONT_HERSHEY_PLAIN, 4, (0, 255, 0), 2)
         else:
             x, y, w, h = boundingRect(contour)
             grid_image = image[y:y + h, x:x + w].copy()
